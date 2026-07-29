@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="pt-BR"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260728-03-9416095"}');</script><script src="/_sdk/728f18890c0241e5.telemetry_sdk.js" integrity="sha512-cMy0xd29wRWs8nyV19fws/+pwQ0u98A3fewCalZ/OWXQXUwzmcx7jKUuZ511uTJlUe1gP0Undii48zuekOylMw=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Pedidos</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #231f20;
+      --red: #d92228;
+      --yellow: #ffc72c;
+      --paper: #fff8ed;
+      --muted: #6b625f;
+      --line: #e7ddd2;
+      --green: #267a48;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "DM Sans", sans-serif;
+    }
+
+    .app-shell {
+      width: 100%;
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      background-image:
+        linear-gradient(90deg, rgba(217,34,40,.028) 1px, transparent 1px),
+        linear-gradient(rgba(217,34,40,.028) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    .mono { font-family: "Space Mono", monospace; }
+
+    .brand-bar { box-shadow: 0 8px 0 var(--yellow); }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #38c96b;
+      box-shadow: 0 0 0 0 rgba(56, 201, 107, .7);
+      animation: pulse 1.8s infinite;
+    }
+
+    .customer-card,
+    .metric-card,
+    .order-card {
+      border: 2px solid rgba(35,31,32,.11);
+      box-shadow: 4px 4px 0 rgba(35,31,32,.08);
+    }
+
+    .product-card {
+      overflow: hidden;
+      border: 2px solid rgba(35,31,32,.10);
+      box-shadow: 4px 4px 0 rgba(35,31,32,.08);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .product-card:hover,
+    .product-card:focus-within {
+      transform: translate(-2px, -2px);
+      border-color: rgba(217,34,40,.5);
+      box-shadow: 7px 7px 0 rgba(217,34,40,.15);
+    }
+
+    .category-button,
+    .filter-button,
+    .payment-button {
+      border: 2px solid rgba(35,31,32,.14);
+      transition: transform .16s ease, background .16s ease, color .16s ease, border-color .16s ease;
+    }
+
+    .category-button:hover,
+    .filter-button:hover,
+    .payment-button:hover { transform: translateY(-1px); }
+
+    .category-button.is-active,
+    .filter-button.is-active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+      box-shadow: 3px 3px 0 var(--yellow);
+    }
+
+    .payment-button.is-active {
+      background: #fff1bd;
+      border-color: var(--yellow);
+      box-shadow: 3px 3px 0 rgba(255,199,44,.75);
+    }
+
+    .add-button {
+      transition: transform .14s ease, background .14s ease;
+    }
+
+    .add-button:hover { transform: translateY(-1px); }
+    .add-button:active { transform: translateY(1px); }
+
+    .cart-row + .cart-row { border-top: 1px dashed var(--line); }
+
+    .quantity-control {
+      border: 1px solid var(--line);
+      background: #fff8ed;
+    }
+
+    .quantity-button {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9px;
+      color: var(--ink);
+      background: #fff;
+      transition: background .15s ease, transform .15s ease;
+    }
+
+    .quantity-button:hover {
+      background: var(--yellow);
+      transform: scale(1.04);
+    }
+
+    .order-card {
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .order-card:hover,
+    .order-card:focus-within {
+      transform: translate(-2px, -2px);
+      box-shadow: 7px 7px 0 rgba(35,31,32,.12);
+    }
+
+    .order-card.is-selected {
+      border-color: var(--red);
+      box-shadow: 6px 6px 0 rgba(217,34,40,.18);
+    }
+
+    .stage-novo { background: #ffe6a2; color: #6b4700; }
+    .stage-preparo { background: #ffe0df; color: #a8171e; }
+    .stage-pronto { background: #dff7e8; color: #17653b; }
+    .stage-entregue { background: #e7e8eb; color: #53565d; }
+
+    .priority-high { color: #b91c24; background: #ffe3e3; }
+    .priority-normal { color: #725000; background: #fff1bd; }
+    .priority-low { color: #226c43; background: #dff7e8; }
+
+    .soft-scroll::-webkit-scrollbar { width: 9px; }
+    .soft-scroll::-webkit-scrollbar-thumb { background: #d5cbc2; border-radius: 99px; }
+
+    .receipt-card {
+      animation: receiptIn .28s ease both;
+    }
+
+    @keyframes pulse {
+      70% { box-shadow: 0 0 0 8px rgba(56,201,107,0); }
+      100% { box-shadow: 0 0 0 0 rgba(56,201,107,0); }
+    }
+
+    @keyframes receiptIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1279px) {
+      .customer-cart { position: static; }
+    }
+  </style>
+  <script src="/_sdk/e61e3bb72e36f08d.editing_sdk.js" integrity="sha512-LNDXoyj464zjNUcR41hm7lkTLlyZduf4kBeksh2z3RHuIS1A12T54/YA9mzuTcPC6fMYEb1qnwz8DUt7H3J6Ag=="></script>
+  <script src="/_sdk/935a53bc2e11fb8d.data_sdk.js" type="text/javascript" integrity="sha512-qr2oyPnEys1WebcOABaRh6hG77r5PWpqeWW6JTKbRJqly/INsfBi31CVNlTmHqjgeLpkVmmHZJUdxSx/32tOFQ=="></script>
+  <script src="/_sdk/6030e540d4419216.resizing_sdk.js" type="text/javascript" integrity="sha512-b5KWzyoXsbWP4smq4sftIi6Kts4YVBpBsz0BwCViwbBJkK64a3/Z6ZMdWA+qnplNcXw4mhZeqvQi3mOosiRJdA=="></script>
+ </head>
+ <body data-template-id="__page-root" style="background: rgb(255, 248, 237);">
+  <div class="app-shell">
+   <header data-template-id="header-section" class="canva-header brand-bar bg-[#231f20]" style="background: rgb(35, 31, 32);">
+    <div class="w-full px-5 py-5 lg:px-8">
+     <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div class="flex items-center gap-4">
+       <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ffc72c] text-[#231f20] shadow-[3px_3px_0_#ffffff]"><i data-lucide="utensils-crossed" class="h-6 w-6" aria-hidden="true"></i>
+       </div>
+       <div>
+        <p data-template-id="header-kicker" class="canva-text m-0 text-xs font-bold uppercase tracking-[.18em] text-[#ffc72c]" style="color: rgb(255, 199, 44); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.12rem;">Autoatendimento + operação</p>
+        <h1 data-template-id="page-title" class="canva-text m-0 mt-1 font-extrabold leading-tight text-white" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 32px;">Painel de Pedidos</h1>
+       </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+       <div data-template-id="live-status" class="canva-tag flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32);"><span class="status-dot" aria-hidden="true"></span> <span data-template-id="live-status-text" class="canva-text" style="color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">Loja aberta agora</span>
+       </div><button id="jump-to-operations" type="button" data-template-id="operations-shortcut" class="canva-button flex items-center gap-2 rounded-full bg-[#d92228] px-4 py-2 text-sm font-extrabold text-white transition hover:bg-[#f13d42]" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 14px;">Ver operação</button>
+      </div>
+     </div>
+    </div>
+   </header>
+   <main class="w-full px-5 py-8 lg:px-8">
+    <section aria-labelledby="customer-heading" class="mb-12">
+     <div class="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+      <div>
+       <p data-template-id="customer-kicker" class="canva-text m-0 text-xs font-extrabold uppercase tracking-[.16em] text-[#d92228]" style="color: rgb(217, 34, 40); font-weight: 800; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Olá! O que vai hoje?</p>
+       <h2 id="customer-heading" data-template-id="customer-title" class="canva-text m-0 mt-1 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 24px;">Monte seu pedido</h2>
+       <p data-template-id="customer-helper" class="canva-text mb-0 mt-2 font-medium text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 500; font-style: normal; font-size: 16px;">Escolha seus favoritos, revise o carrinho e finalize em poucos toques.</p>
+      </div><label class="relative block w-full max-w-xl"> <span data-template-id="search-label" class="canva-text mb-2 block text-sm font-bold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">Encontre seu item</span> <i data-lucide="search" class="pointer-events-none absolute left-4 bottom-[15px] h-5 w-5 text-[#6b625f]" aria-hidden="true"></i> <input id="product-search" type="search" data-template-id="search-input" class="canva-input w-full rounded-2xl border-2 border-[#ded3c9] bg-white py-3 pl-11 pr-4 text-base font-semibold text-[#231f20] outline-none transition focus:border-[#d92228] focus:ring-4 focus:ring-[#ffe0df]" placeholder="Busque hambúrguer, batata, bebida..." style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 500; font-style: normal; font-size: 16px;"> </label>
+     </div>
+     <div class="grid gap-7 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <section class="min-w-0" aria-label="Menu de autoatendimento">
+       <nav aria-label="Categorias do menu" class="mb-6 flex flex-wrap gap-2"><button type="button" data-category="lanches" data-template-id="category-lanches" class="canva-button category-button is-active rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Lanches</button> <button type="button" data-category="sobremesas" data-template-id="category-sobremesas" class="canva-button category-button rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Sobremesas</button> <button type="button" data-category="bebidas" data-template-id="category-bebidas" class="canva-button category-button rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Bebidas</button> <button type="button" data-category="combos" data-template-id="category-combos" class="canva-button category-button rounded-full bg-white px-5 py-3 text-sm font-extrabold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Combos</button>
+       </nav>
+       <div id="product-grid" class="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
+        <article class="product-card customer-card product-item rounded-3xl bg-white" data-category="lanches" data-product-id="burger"><img data-template-id="product-burger-image" loading="lazy" class="canva-image h-40 w-full object-cover" src="https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=800" alt="Hambúrguer com queijo, bacon, alface e tomate">
+         <div class="p-5">
+          <div class="flex items-start justify-between gap-4">
+           <div>
+            <h3 data-template-id="product-burger-name" class="canva-text m-0 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 18px;">Hambúrguer Clássico</h3>
+            <p data-template-id="product-burger-description" class="canva-text mb-0 mt-2 text-sm leading-relaxed text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Carne grelhada, salada fresca e molho especial.</p>
+           </div><span data-template-id="product-burger-price" class="canva-tag mono shrink-0 rounded-xl bg-[#fff1bd] px-2 py-1 text-sm font-bold text-[#231f20]" style="background: rgb(255, 241, 189); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">R$ 18,90</span>
+          </div><button type="button" data-product="burger" data-template-id="product-burger-add" class="canva-button add-button mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d92228] px-4 py-3 font-extrabold text-white hover:bg-[#f13d42]" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Adicionar</button>
+         </div>
+        </article>
+        <article class="product-card customer-card product-item rounded-3xl bg-white" data-category="lanches" data-product-id="cheeseburger"><img data-template-id="product-cheeseburger-image" loading="lazy" class="canva-image h-40 w-full object-cover" src="https://images.pexels.com/photos/2983101/pexels-photo-2983101.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=800" alt="Cheeseburger servido com batatas fritas">
+         <div class="p-5">
+          <div class="flex items-start justify-between gap-4">
+           <div>
+            <h3 data-template-id="product-cheeseburger-name" class="canva-text m-0 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 18px;">Cheeseburger</h3>
+            <p data-template-id="product-cheeseburger-description" class="canva-text mb-0 mt-2 text-sm leading-relaxed text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Carne, queijo derretido, picles e pão macio.</p>
+           </div><span data-template-id="product-cheeseburger-price" class="canva-tag mono shrink-0 rounded-xl bg-[#fff1bd] px-2 py-1 text-sm font-bold text-[#231f20]" style="background: rgb(255, 241, 189); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">R$ 20,90</span>
+          </div><button type="button" data-product="cheeseburger" data-template-id="product-cheeseburger-add" class="canva-button add-button mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d92228] px-4 py-3 font-extrabold text-white hover:bg-[#f13d42]" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Adicionar</button>
+         </div>
+        </article>
+        <article class="product-card customer-card product-item rounded-3xl bg-white" data-category="lanches" data-product-id="fries"><img data-template-id="product-fries-image" loading="lazy" class="canva-image h-40 w-full object-cover" src="https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=800" alt="Batatas fritas douradas em uma tigela">
+         <div class="p-5">
+          <div class="flex items-start justify-between gap-4">
+           <div>
+            <h3 data-template-id="product-fries-name" class="canva-text m-0 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 18px;">Batata Frita</h3>
+            <p data-template-id="product-fries-description" class="canva-text mb-0 mt-2 text-sm leading-relaxed text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Batatas douradas, crocantes por fora e macias por dentro.</p>
+           </div><span data-template-id="product-fries-price" class="canva-tag mono shrink-0 rounded-xl bg-[#fff1bd] px-2 py-1 text-sm font-bold text-[#231f20]" style="background: rgb(255, 241, 189); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">R$ 11,90</span>
+          </div><button type="button" data-product="fries" data-template-id="product-fries-add" class="canva-button add-button mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d92228] px-4 py-3 font-extrabold text-white hover:bg-[#f13d42]" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Adicionar</button>
+         </div>
+        </article>
+        <article class="product-card customer-card product-item rounded-3xl bg-white" data-category="lanches" data-product-id="nuggets"><img data-template-id="product-nuggets-image" loading="lazy" class="canva-image h-40 w-full object-cover" src="https://images.pexels.com/photos/6941010/pexels-photo-6941010.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=800" alt="Nuggets e acompanhamentos fritos em um prato">
+         <div class="p-5">
+          <div class="flex items-start justify-between gap-4">
+           <div>
+            <h3 data-template-id="product-nuggets-name" class="canva-text m-0 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 18px;">Nuggets Crocantes</h3>
+            <p data-template-id="product-nuggets-description" class="canva-text mb-0 mt-2 text-sm leading-relaxed text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Porção com 10 unidades e molho para acompanhar.</p>
+           </div><span data-template-id="product-nuggets-price" class="canva-tag mono shrink-0 rounded-xl bg-[#fff1bd] px-2 py-1 text-sm font-bold text-[#231f20]" style="background: rgb(255, 241, 189); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">R$ 14,90</span>
+          </div><button type="button" data-product="nuggets" data-template-id="product-nuggets-add" class="canva-button add-button mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d92228] px-4 py-3 font-extrabold text-white hover:bg-[#f13d42]" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Adicionar</button>
+         </div>
+        </article>
+        <article class="product-card customer-card product-item rounded-3xl bg-white" data-category="sobremesas" data-product-id="sundae"><img data-template-id="product-sundae-image" loading="lazy" class="canva-image h-40 w-full object-cover" src="https://images.pexels.com/photos/1362534/pexels-photo-1362534.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=800" alt="Sorvetes decorados com confeitos e casquinhas">
+         <div class="p-5">
+          <div class="flex items-start justify-between gap-4">
+           <div>
+            <h3 data-template-id="product-sundae-name" class="canva-text m-0 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 18px;">Sundae</h3>
+            <p data-template-id="product-sundae-description" class="canva-text mb-0 mt-2 text-sm leading-relaxed text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Sorvete cremoso com calda de chocolate e crocantes.</p>
+           </div><span data-template-id="product-sundae-price" class="canva-tag mono shrink-0 rounded-xl bg-[#fff1bd] px-2 py-1 text-sm font-bold text-[#231f20]" style="background: rgb(255, 241, 189); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">R$ 10,90</span>
+          </div><button type="button" data-product="sundae" data-template-id="product-sundae-add" class="canva-button add-button mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d92228] px-4 py-3 font-extrabold text-white hover:bg-[#f13d42]" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Adicionar</button>
+         </div>
+        </article>
+        <article class="product-card customer-card product-item rounded-3xl bg-white" data-category="sobremesas" data-product-id="milkshake"><img data-template-id="product-milkshake-image" loading="lazy" class="canva-image h-40 w-full object-cover" src="https://images.pexels.com/photos/3727250/pexels-photo-3727250.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=800" alt="Milk-shake de chocolate com morango e biscoitos">
+         <div class="p-5">
+          <div class="flex items-start justify-between gap-4">
+           <div>
+            <h3 data-template-id="product-milkshake-name" class="canva-text m-0 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 18px;">Milk-shake</h3>
+            <p data-template-id="product-milkshake-description" class="canva-text mb-0 mt-2 text-sm leading-relaxed text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Cremoso, gelado e finalizado com chantilly.</p>
+           </div><span data-template-id="product-milkshake-price" class="canva-tag mono shrink-0 rounded-xl bg-[#fff1bd] px-2 py-1 text-sm font-bold text-[#231f20]" style="background: rgb(255, 241, 189); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">R$ 15,90</span>
+          </div><button type="button" data-product="milkshake" data-template-id="product-milkshake-add" class="canva-button add-button mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d92228] px-4 py-3 font-extrabold text-white hover:bg-[#f13d42]" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Adicionar</button>
+         </div>
+        </article>
+        <article class="product-card customer-card product-item rounded-3xl bg-white" data-category="bebidas" data-product-id="soda"><img data-template-id="product-soda-image" loading="lazy" class="canva-image h-40 w-full object-cover" src="https://images.pexels.com/photos/33469209/pexels-photo-33469209.jpeg" alt="Copo de refrigerante com gelo">
+         <div class="p-5">
+          <div class="flex items-start justify-between gap-4">
+           <div>
+            <h3 data-template-id="product-soda-name" class="canva-text m-0 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 18px;">Refrigerante</h3>
+            <p data-template-id="product-soda-description" class="canva-text mb-0 mt-2 text-sm leading-relaxed text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Bebida gelada com gelo, opção normal ou sem açúcar.</p>
+           </div><span data-template-id="product-soda-price" class="canva-tag mono shrink-0 rounded-xl bg-[#fff1bd] px-2 py-1 text-sm font-bold text-[#231f20]" style="background: rgb(255, 241, 189); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">R$ 7,50</span>
+          </div><button type="button" data-product="soda" data-template-id="product-soda-add" class="canva-button add-button mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d92228] px-4 py-3 font-extrabold text-white hover:bg-[#f13d42]" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Adicionar</button>
+         </div>
+        </article>
+        <article class="product-card customer-card product-item rounded-3xl bg-white" data-category="combos" data-product-id="combo"><img data-template-id="product-combo-image" loading="lazy" class="canva-image h-40 w-full object-cover" src="https://images.pexels.com/photos/19247570/pexels-photo-19247570.jpeg" alt="Cheeseburger com batatas fritas, nuggets e refrigerante">
+         <div class="p-5">
+          <div class="flex items-start justify-between gap-4">
+           <div>
+            <h3 data-template-id="product-combo-name" class="canva-text m-0 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 18px;">Combo Promocional</h3>
+            <p data-template-id="product-combo-description" class="canva-text mb-0 mt-2 text-sm leading-relaxed text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Cheeseburger, batata média e bebida gelada.</p>
+           </div><span data-template-id="product-combo-price" class="canva-tag mono shrink-0 rounded-xl bg-[#fff1bd] px-2 py-1 text-sm font-bold text-[#231f20]" style="background: rgb(255, 241, 189); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">R$ 29,90</span>
+          </div><button type="button" data-product="combo" data-template-id="product-combo-add" class="canva-button add-button mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d92228] px-4 py-3 font-extrabold text-white hover:bg-[#f13d42]" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Adicionar</button>
+         </div>
+        </article>
+       </div>
+       <div id="no-products" class="hidden rounded-3xl border-2 border-dashed border-[#d5cbc2] bg-white/75 px-6 py-14 text-center"><i data-lucide="search-x" class="mx-auto h-10 w-10 text-[#d92228]" aria-hidden="true"></i>
+        <p data-template-id="no-products-title" class="canva-text mb-0 mt-4 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 16px;">Nenhum item encontrado</p>
+        <p data-template-id="no-products-helper" class="canva-text mb-0 mt-1 text-sm text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Tente outro termo ou escolha uma categoria diferente.</p>
+       </div>
+      </section>
+      <aside data-template-id="cart-panel" class="canva-panel customer-cart h-fit rounded-[30px] bg-[#231f20] p-5 text-white shadow-[8px_8px_0_#ffc72c] xl:sticky xl:top-5" style="background: rgb(35, 31, 32);">
+       <div class="flex items-start justify-between gap-4">
+        <div>
+         <p data-template-id="cart-kicker" class="canva-text m-0 text-xs font-bold uppercase tracking-[.16em] text-[#ffc72c]" style="color: rgb(255, 199, 44); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Seu pedido</p>
+         <h2 data-template-id="cart-title" class="canva-text m-0 mt-1 font-extrabold text-white" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 24px;">Carrinho</h2>
+        </div><span id="cart-count" class="mono rounded-full bg-[#ffc72c] px-3 py-2 text-sm font-bold text-[#231f20]" aria-live="polite">0</span>
+       </div>
+       <div id="cart-empty" class="mt-5 rounded-2xl border border-white/15 bg-white/5 px-5 py-8 text-center"><i data-lucide="shopping-bag" class="mx-auto h-8 w-8 text-[#ffc72c]" aria-hidden="true"></i>
+        <p data-template-id="cart-empty-title" class="canva-text mb-0 mt-3 font-bold text-white" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Seu carrinho está vazio</p>
+        <p data-template-id="cart-empty-helper" class="canva-text mb-0 mt-1 text-sm leading-relaxed text-white/70" style="color: rgb(255, 255, 255); font-weight: 400; font-style: normal; font-size: 14px;">Adicione itens do menu para ver o resumo aqui.</p>
+       </div>
+       <div id="cart-items" class="soft-scroll mt-5 max-h-[300px] overflow-y-auto rounded-2xl bg-white p-1 text-[#231f20]"></div>
+       <div class="mt-5 border-t border-white/15 pt-4">
+        <div class="flex justify-between gap-4 text-sm font-semibold text-white/75"><span data-template-id="subtotal-label" class="canva-text" style="color: rgb(255, 255, 255); font-weight: 600; font-style: normal; font-size: 14px;">Subtotal</span> <span id="subtotal-value" class="mono">R$ 0,00</span>
+        </div>
+        <div class="mt-3 flex justify-between gap-4 text-sm font-semibold text-white/75"><span data-template-id="fee-label" class="canva-text" style="color: rgb(255, 255, 255); font-weight: 600; font-style: normal; font-size: 14px;">Taxa de atendimento</span> <span id="fee-value" class="mono">R$ 0,00</span>
+        </div>
+        <div class="mt-4 flex items-end justify-between gap-4 rounded-2xl bg-white/10 p-4"><span data-template-id="total-label" class="canva-text font-extrabold text-white" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 17px;">Total</span> <span id="total-value" class="mono text-2xl font-bold text-[#ffc72c]">R$ 0,00</span>
+        </div>
+       </div>
+       <section aria-labelledby="payment-heading" class="mt-5">
+        <h3 id="payment-heading" data-template-id="payment-title" class="canva-text m-0 text-sm font-extrabold text-white" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Forma de pagamento</h3>
+        <div class="mt-3 grid grid-cols-2 gap-2"><button type="button" data-payment="pix" data-template-id="payment-pix" class="canva-button payment-button is-active rounded-2xl bg-white px-3 py-3 text-sm font-extrabold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Pix</button> <button type="button" data-payment="credito" data-template-id="payment-credit" class="canva-button payment-button rounded-2xl bg-white px-3 py-3 text-sm font-extrabold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Crédito</button> <button type="button" data-payment="debito" data-template-id="payment-debit" class="canva-button payment-button rounded-2xl bg-white px-3 py-3 text-sm font-extrabold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Débito</button> <button type="button" data-payment="dinheiro" data-template-id="payment-cash" class="canva-button payment-button rounded-2xl bg-white px-3 py-3 text-sm font-extrabold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Dinheiro</button>
+        </div>
+       </section><button id="checkout-button" type="button" data-template-id="checkout-button" class="canva-button mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#d92228] px-4 py-4 font-extrabold text-white transition hover:bg-[#f13d42] disabled:cursor-not-allowed disabled:opacity-45" style="background: rgb(217, 34, 40); color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 16px;">Finalizar pedido</button>
+       <p id="checkout-message" class="mt-3 hidden rounded-xl bg-[#ffe0df] px-3 py-2 text-center text-sm font-bold text-[#a8171e]" aria-live="polite"></p>
+      </aside>
+     </div>
+     <section id="receipt-section" class="mt-8 hidden" aria-labelledby="receipt-heading">
+      <article data-template-id="receipt-panel" class="canva-panel receipt-card mx-auto max-w-3xl rounded-[30px] bg-white p-6 shadow-[6px_6px_0_rgba(35,31,32,.1)]" style="background: rgb(255, 255, 255);">
+       <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-4">
+         <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#dff7e8] text-[#17653b]"><i data-lucide="circle-check-big" class="h-7 w-7" aria-hidden="true"></i>
+         </div>
+         <div>
+          <p data-template-id="receipt-kicker" class="canva-text m-0 text-xs font-extrabold uppercase tracking-[.14em] text-[#267a48]" style="color: rgb(38, 122, 72); font-weight: 800; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Pedido confirmado</p>
+          <h2 id="receipt-heading" data-template-id="receipt-title" class="canva-text m-0 mt-1 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 24px;">Tudo certo! Já enviamos para a cozinha.</h2>
+         </div>
+        </div><button id="new-order-button" type="button" data-template-id="new-order-button" class="canva-button rounded-2xl bg-[#ffc72c] px-5 py-3 font-extrabold text-[#231f20] transition hover:bg-[#ffdb5a]" style="background: rgb(255, 199, 44); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Fazer novo pedido</button>
+       </div>
+       <div class="mt-6 grid gap-3 sm:grid-cols-4">
+        <div class="rounded-2xl bg-[#fff8ed] p-4">
+         <p data-template-id="receipt-number-label" class="canva-text m-0 text-xs font-bold uppercase tracking-wide text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.05rem;">Pedido</p>
+         <p id="receipt-number" class="mono mb-0 mt-1 font-bold text-[#231f20]">#0000</p>
+        </div>
+        <div class="rounded-2xl bg-[#fff8ed] p-4">
+         <p data-template-id="receipt-client-label" class="canva-text m-0 text-xs font-bold uppercase tracking-wide text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.05rem;">Cliente</p>
+         <p data-template-id="receipt-client-value" class="canva-text mb-0 mt-1 font-bold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 15px;">Cliente do balcão</p>
+        </div>
+        <div class="rounded-2xl bg-[#fff8ed] p-4">
+         <p data-template-id="receipt-time-label" class="canva-text m-0 text-xs font-bold uppercase tracking-wide text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.05rem;">Tempo estimado</p>
+         <p id="receipt-time" class="mono mb-0 mt-1 font-bold text-[#231f20]">12 min</p>
+        </div>
+        <div class="rounded-2xl bg-[#fff8ed] p-4">
+         <p data-template-id="receipt-status-label" class="canva-text m-0 text-xs font-bold uppercase tracking-wide text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.05rem;">Status</p>
+         <p data-template-id="receipt-status-value" class="canva-text mb-0 mt-1 font-bold text-[#267a48]" style="color: rgb(38, 122, 72); font-weight: 700; font-style: normal; font-size: 15px;">Em preparação</p>
+        </div>
+       </div>
+      </article>
+     </section>
+    </section>
+    <section id="operations-panel" aria-labelledby="operations-heading" class="border-t-2 border-[#e2d7cc] pt-10">
+     <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+       <p data-template-id="operations-kicker" class="canva-text m-0 text-xs font-extrabold uppercase tracking-[.16em] text-[#d92228]" style="color: rgb(217, 34, 40); font-weight: 800; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Área da equipe</p>
+       <h2 id="operations-heading" data-template-id="operations-title" class="canva-text m-0 mt-1 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 24px;">Painel operacional</h2>
+       <p data-template-id="operations-helper" class="canva-text mb-0 mt-2 font-medium text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 500; font-style: normal; font-size: 16px;">Acompanhe a fila de produção e mantenha cada pedido em movimento.</p>
+      </div>
+      <p id="visible-count" class="mono m-0 text-sm font-bold text-[#6b625f]" aria-live="polite"></p>
+     </div>
+     <div class="mb-7 grid gap-4 md:grid-cols-3">
+      <article data-template-id="total-card" class="canva-card metric-card rounded-3xl bg-white p-5" style="background: rgb(255, 255, 255);">
+       <div class="flex items-start justify-between">
+        <div>
+         <p data-template-id="total-orders-label" class="canva-text m-0 text-sm font-bold uppercase tracking-[.11em] text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 700; font-style: normal; font-size: 13px; letter-spacing: 0.08rem;">Total de pedidos</p>
+         <p id="total-orders" class="mono mt-2 text-4xl font-bold text-[#231f20]" aria-live="polite">0</p>
+        </div>
+        <div class="rounded-2xl bg-[#ffc72c] p-3 text-[#231f20]"><i data-lucide="receipt-text" class="h-6 w-6" aria-hidden="true"></i>
+        </div>
+       </div>
+      </article>
+      <article data-template-id="avg-card" class="canva-card metric-card rounded-3xl bg-white p-5" style="background: rgb(255, 255, 255);">
+       <div class="flex items-start justify-between">
+        <div>
+         <p data-template-id="avg-label" class="canva-text m-0 text-sm font-bold uppercase tracking-[.11em] text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 700; font-style: normal; font-size: 13px; letter-spacing: 0.08rem;">Tempo médio de preparo</p>
+         <p id="average-time" class="mono mt-2 text-4xl font-bold text-[#231f20]" aria-live="polite">0 min</p>
+        </div>
+        <div class="rounded-2xl bg-[#d92228] p-3 text-white"><i data-lucide="timer" class="h-6 w-6" aria-hidden="true"></i>
+        </div>
+       </div>
+      </article>
+      <article data-template-id="late-card" class="canva-card metric-card rounded-3xl bg-[#fff0f0] p-5" style="background: rgb(255, 240, 240);">
+       <div class="flex items-start justify-between">
+        <div>
+         <p data-template-id="late-label" class="canva-text m-0 text-sm font-bold uppercase tracking-[.11em] text-[#a8171e]" style="color: rgb(168, 23, 30); font-weight: 700; font-style: normal; font-size: 13px; letter-spacing: 0.08rem;">Pedidos atrasados</p>
+         <p id="late-orders" class="mono mt-2 text-4xl font-bold text-[#a8171e]" aria-live="polite">0</p>
+        </div>
+        <div class="rounded-2xl bg-[#231f20] p-3 text-[#ffc72c]"><i data-lucide="triangle-alert" class="h-6 w-6" aria-hidden="true"></i>
+        </div>
+       </div>
+      </article>
+     </div>
+     <div class="grid gap-7 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <section class="min-w-0" aria-label="Fila de produção">
+       <nav aria-label="Filtros por etapa" class="mb-6 flex flex-wrap gap-2"><button type="button" data-stage="todos" data-template-id="filter-all" class="canva-button filter-button is-active rounded-full bg-white px-4 py-2 text-sm font-bold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">Todos</button> <button type="button" data-stage="novo" data-template-id="filter-new" class="canva-button filter-button rounded-full bg-white px-4 py-2 text-sm font-bold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">Novos</button> <button type="button" data-stage="preparo" data-template-id="filter-prep" class="canva-button filter-button rounded-full bg-white px-4 py-2 text-sm font-bold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">Em preparo</button> <button type="button" data-stage="pronto" data-template-id="filter-ready" class="canva-button filter-button rounded-full bg-white px-4 py-2 text-sm font-bold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">Prontos</button> <button type="button" data-stage="entregue" data-template-id="filter-delivered" class="canva-button filter-button rounded-full bg-white px-4 py-2 text-sm font-bold text-[#231f20]" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 700; font-style: normal; font-size: 14px;">Entregues</button>
+       </nav>
+       <div id="order-list" class="grid gap-4 md:grid-cols-2 2xl:grid-cols-3" aria-live="polite"></div>
+       <div id="empty-orders" class="hidden rounded-3xl border-2 border-dashed border-[#d5cbc2] bg-white/70 px-6 py-14 text-center"><i data-lucide="package-check" class="mx-auto h-10 w-10 text-[#d92228]" aria-hidden="true"></i>
+        <p data-template-id="empty-title" class="canva-text mb-0 mt-4 font-extrabold text-[#231f20]" style="color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 16px;">Nenhum pedido nesta etapa</p>
+        <p data-template-id="empty-helper" class="canva-text mb-0 mt-1 text-sm text-[#6b625f]" style="color: rgb(107, 98, 95); font-weight: 400; font-style: normal; font-size: 14px;">Escolha outro filtro para visualizar a fila.</p>
+       </div>
+      </section>
+      <aside data-template-id="details-panel" class="canva-panel h-fit rounded-[28px] bg-[#231f20] p-5 text-white shadow-[8px_8px_0_rgba(255,199,44,.98)] xl:sticky xl:top-5" style="background: rgb(35, 31, 32);">
+       <div class="mb-5 flex items-start justify-between gap-4">
+        <div>
+         <p data-template-id="details-kicker" class="canva-text m-0 text-xs font-bold uppercase tracking-[.16em] text-[#ffc72c]" style="color: rgb(255, 199, 44); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.12rem;">Detalhes do pedido</p>
+         <h2 id="detail-heading" class="mono mb-0 mt-1 text-3xl font-bold text-white">#000</h2>
+        </div><span id="detail-stage" class="rounded-full px-3 py-1 text-xs font-extrabold uppercase">—</span>
+       </div>
+       <div class="mb-5 grid grid-cols-2 gap-3">
+        <div class="rounded-2xl bg-white/10 p-3">
+         <p data-template-id="detail-time-label" class="canva-text m-0 text-xs font-bold uppercase tracking-wide text-white/65" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.08rem;">Horário</p>
+         <p id="detail-time" class="mono mb-0 mt-1 text-base font-bold">—</p>
+        </div>
+        <div class="rounded-2xl bg-white/10 p-3">
+         <p data-template-id="detail-estimate-label" class="canva-text m-0 text-xs font-bold uppercase tracking-wide text-white/65" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.08rem;">Estimativa</p>
+         <p id="detail-estimate" class="mono mb-0 mt-1 text-base font-bold">—</p>
+        </div>
+       </div>
+       <div class="mb-4 flex items-center justify-between">
+        <h3 data-template-id="items-title" class="canva-text m-0 font-extrabold text-white" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 19px;">Itens do pedido</h3><span id="detail-priority" class="rounded-full px-3 py-1 text-xs font-extrabold uppercase">—</span>
+       </div>
+       <div id="detail-items" class="rounded-2xl bg-white p-1 text-[#231f20]"></div>
+       <div class="mt-5 rounded-2xl border border-white/15 bg-white/5 p-4">
+        <p data-template-id="notes-label" class="canva-text m-0 text-xs font-bold uppercase tracking-[.12em] text-[#ffc72c]" style="color: rgb(255, 199, 44); font-weight: 700; font-style: normal; font-size: 11px; letter-spacing: 0.1rem;">Observações</p>
+        <p id="detail-notes" class="mb-0 mt-2 text-sm leading-relaxed text-white/85">—</p>
+       </div>
+       <div class="mt-5 grid grid-cols-2 gap-3"><button id="previous-button" type="button" data-template-id="previous-button" class="canva-button flex items-center justify-center gap-2 rounded-2xl bg-white px-3 py-3 text-sm font-extrabold text-[#231f20] transition hover:bg-[#fff1bd] disabled:cursor-not-allowed disabled:opacity-40" style="background: rgb(255, 255, 255); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Voltar</button> <button id="next-button" type="button" data-template-id="next-button" class="canva-button flex items-center justify-center gap-2 rounded-2xl bg-[#ffc72c] px-3 py-3 text-sm font-extrabold text-[#231f20] transition hover:bg-[#ffdc5b] disabled:cursor-not-allowed disabled:opacity-40" style="background: rgb(255, 199, 44); color: rgb(35, 31, 32); font-weight: 800; font-style: normal; font-size: 14px;">Avançar</button>
+       </div>
+      </aside>
+     </div>
+    </section>
+   </main>
+   <footer class="w-full px-5 pb-6 lg:px-8">
+    <div class="flex flex-col justify-between gap-2 border-t border-[#d5cbc2] pt-4 text-xs font-semibold text-[#6b625f] sm:flex-row"><span data-template-id="footer-note" class="canva-text" style="color: rgb(107, 98, 95); font-weight: 600; font-style: normal; font-size: 12px;">Autoatendimento e painel operacional integrados</span> <span class="mono">ATUALIZAÇÃO OPERACIONAL · 04:15</span>
+    </div>
+   </footer>
+  </div>
+  <template id="cart-row-template">
+   <div class="cart-row px-3 py-3" data-cart-id="">
+    <div class="flex items-start justify-between gap-3">
+     <div>
+      <p class="cart-name m-0 text-sm font-extrabold text-[#231f20]"></p>
+      <p class="cart-price mono mb-0 mt-1 text-xs font-bold text-[#6b625f]"></p>
+     </div>
+     <p class="cart-line-total mono m-0 text-sm font-bold text-[#d92228]"></p>
+    </div>
+    <div class="mt-3 flex items-center justify-between">
+     <div class="quantity-control inline-flex items-center gap-2 rounded-xl p-1"><button type="button" class="quantity-button minus-button" aria-label="Diminuir quantidade"> <i data-lucide="minus" class="h-4 w-4" aria-hidden="true"></i> </button> <span class="cart-quantity mono min-w-5 text-center text-sm font-bold"></span> <button type="button" class="quantity-button plus-button" aria-label="Aumentar quantidade"> <i data-lucide="plus" class="h-4 w-4" aria-hidden="true"></i> </button>
+     </div><button type="button" class="remove-button inline-flex h-8 w-8 items-center justify-center rounded-xl text-[#a8171e] transition hover:bg-[#ffe0df]" aria-label="Remover item"> <i data-lucide="trash-2" class="h-4 w-4" aria-hidden="true"></i> </button>
+    </div>
+   </div>
+  </template>
+  <template id="order-card-template">
+   <article class="order-card relative cursor-pointer rounded-3xl bg-white p-5" tabindex="0" role="button">
+    <div class="mb-4 flex items-start justify-between gap-3">
+     <div>
+      <p class="mono order-number m-0 text-2xl font-bold text-[#231f20]"></p>
+      <p class="order-time mt-1 mb-0 text-sm font-semibold text-[#6b625f]"></p>
+     </div><span class="order-stage rounded-full px-3 py-1 text-xs font-extrabold uppercase"></span>
+    </div>
+    <p class="order-summary mb-4 min-h-[42px] text-sm font-semibold leading-relaxed text-[#231f20]"></p>
+    <div class="flex items-end justify-between gap-3 border-t border-dashed border-[#d5cbc2] pt-4">
+     <div>
+      <p class="m-0 text-[11px] font-bold uppercase tracking-[.1em] text-[#6b625f]">Tempo estimado</p>
+      <p class="order-estimate mono mb-0 mt-1 text-sm font-bold text-[#d92228]"></p>
+     </div><span class="order-priority rounded-full px-3 py-1 text-xs font-extrabold uppercase"></span>
+    </div>
+   </article>
+  </template>
+  <script>
+    const productData = {
+      burger: { name: "Hambúrguer Clássico", price: 18.90 },
+      cheeseburger: { name: "Cheeseburger", price: 20.90 },
+      fries: { name: "Batata Frita", price: 11.90 },
+      nuggets: { name: "Nuggets Crocantes", price: 14.90 },
+      sundae: { name: "Sundae", price: 10.90 },
+      milkshake: { name: "Milk-shake", price: 15.90 },
+      soda: { name: "Refrigerante", price: 7.50 },
+      combo: { name: "Combo Promocional", price: 29.90 }
+    };
+
+    const stages = ["novo", "preparo", "pronto", "entregue"];
+    const stageLabels = { novo: "Novo", preparo: "Em preparo", pronto: "Pronto", entregue: "Entregue" };
+    const priorityLabels = { high: "Prioridade alta", normal: "Prioridade normal", low: "Prioridade baixa" };
+
+    const orders = [
+      { id: "1842", time: "04:02", stage: "novo", estimate: 12, elapsed: 8, priority: "high", summary: "2x Combo Clássico • Batata grande • Refrigerante", items: ["2x Combo Clássico", "1x Batata frita grande", "2x Refrigerante lata"], notes: "Sem cebola no segundo hambúrguer." },
+      { id: "1841", time: "04:00", stage: "preparo", estimate: 10, elapsed: 14, priority: "high", summary: "Combo Duplo • Milk-shake de chocolate", items: ["1x Combo Duplo", "1x Milk-shake de chocolate", "1x Molho especial"], notes: "Pedido para retirada no balcão." },
+      { id: "1840", time: "03:58", stage: "pronto", estimate: 9, elapsed: 11, priority: "normal", summary: "Nuggets • Batata média • Sundae", items: ["10x Nuggets crocantes", "1x Batata frita média", "1x Sundae"], notes: "Conferir guardanapos e ketchup." },
+      { id: "1839", time: "03:56", stage: "preparo", estimate: 13, elapsed: 7, priority: "normal", summary: "2x Cheeseburger • Refrigerante zero", items: ["2x Cheeseburger", "1x Refrigerante zero 500 ml", "1x Batata frita pequena"], notes: "Molhos à parte." },
+      { id: "1838", time: "03:53", stage: "entregue", estimate: 8, elapsed: 8, priority: "low", summary: "Combo infantil • Suco de laranja", items: ["1x Combo infantil", "1x Suco de laranja", "1x Brinquedo surpresa"], notes: "Entregue no balcão 2." }
+    ];
+
+    let cart = {};
+    let activeCategory = "lanches";
+    let activePayment = "pix";
+    let activeFilter = "todos";
+    let selectedId = "1842";
+    let nextOrderId = 1843;
+
+    const currency = value => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    const productGrid = document.getElementById("product-grid");
+    const noProducts = document.getElementById("no-products");
+    const cartItems = document.getElementById("cart-items");
+    const cartEmpty = document.getElementById("cart-empty");
+    const cartTemplate = document.getElementById("cart-row-template");
+    const cartRows = new Map();
+    const orderList = document.getElementById("order-list");
+    const orderTemplate = document.getElementById("order-card-template");
+    const orderCards = new Map();
+
+    function cartCount() {
+      return Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
+    }
+
+    function subtotal() {
+      return Object.entries(cart).reduce((sum, [id, quantity]) => sum + productData[id].price * quantity, 0);
+    }
+
+    function fee() {
+      return 0;
+    }
+
+    function updateProductVisibility() {
+      const searchValue = document.getElementById("product-search").value.trim().toLowerCase();
+      let visible = 0;
+
+      document.querySelectorAll(".product-item").forEach(card => {
+        const product = productData[card.dataset.productId];
+        const byCategory = card.dataset.category === activeCategory;
+        const bySearch = !searchValue || product.name.toLowerCase().includes(searchValue);
+        const show = byCategory && bySearch;
+        card.classList.toggle("hidden", !show);
+        if (show) visible++;
+      });
+
+      noProducts.classList.toggle("hidden", visible !== 0);
+    }
+
+    function updateCategoryButtons() {
+      document.querySelectorAll("[data-category]").forEach(button => {
+        const active = button.dataset.category === activeCategory;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    function createCartRow(id) {
+      const row = cartTemplate.content.firstElementChild.cloneNode(true);
+      row.dataset.cartId = id;
+      row.querySelector(".minus-button").addEventListener("click", () => changeQuantity(id, -1));
+      row.querySelector(".plus-button").addEventListener("click", () => changeQuantity(id, 1));
+      row.querySelector(".remove-button").addEventListener("click", () => removeFromCart(id));
+      cartRows.set(id, row);
+      return row;
+    }
+
+    function renderCart() {
+      const ids = Object.keys(cart);
+      const existing = new Set(cartRows.keys());
+
+      ids.forEach(id => {
+        let row = cartRows.get(id);
+        if (!row) row = createCartRow(id);
+
+        const quantity = cart[id];
+        const product = productData[id];
+        row.querySelector(".cart-name").textContent = product.name;
+        row.querySelector(".cart-price").textContent = currency(product.price) + " cada";
+        row.querySelector(".cart-quantity").textContent = quantity;
+        row.querySelector(".cart-line-total").textContent = currency(product.price * quantity);
+        cartItems.appendChild(row);
+        existing.delete(id);
+      });
+
+      existing.forEach(id => {
+        const row = cartRows.get(id);
+        if (row) row.remove();
+        cartRows.delete(id);
+      });
+
+      const totalItems = cartCount();
+      cartEmpty.classList.toggle("hidden", totalItems !== 0);
+      cartItems.classList.toggle("hidden", totalItems === 0);
+      document.getElementById("cart-count").textContent = totalItems;
+      document.getElementById("subtotal-value").textContent = currency(subtotal());
+      document.getElementById("fee-value").textContent = currency(fee());
+      document.getElementById("total-value").textContent = currency(subtotal() + fee());
+      document.getElementById("checkout-button").disabled = totalItems === 0;
+      lucide.createIcons();
+    }
+
+    function addToCart(id) {
+      cart[id] = (cart[id] || 0) + 1;
+      document.getElementById("checkout-message").classList.add("hidden");
+      renderCart();
+    }
+
+    function changeQuantity(id, amount) {
+      if (!cart[id]) return;
+      cart[id] += amount;
+      if (cart[id] <= 0) delete cart[id];
+      renderCart();
+    }
+
+    function removeFromCart(id) {
+      delete cart[id];
+      renderCart();
+    }
+
+    function updatePaymentButtons() {
+      document.querySelectorAll("[data-payment]").forEach(button => {
+        const active = button.dataset.payment === activePayment;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    function stageClass(stage) { return "stage-" + stage; }
+    function priorityClass(priority) { return "priority-" + priority; }
+
+    function getOrder(id) {
+      return orders.find(order => order.id === id);
+    }
+
+    function createOrderCard(order) {
+      const card = orderTemplate.content.firstElementChild.cloneNode(true);
+      card.dataset.orderId = order.id;
+
+      const select = () => {
+        selectedId = order.id;
+        updateOperations();
+      };
+
+      card.addEventListener("click", select);
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          select();
+        }
+      });
+
+      orderCards.set(order.id, card);
+      return card;
+    }
+
+    function updateOrderCard(card, order) {
+      const selected = selectedId === order.id;
+      card.classList.toggle("is-selected", selected);
+      card.setAttribute("aria-pressed", String(selected));
+      card.querySelector(".order-number").textContent = "#" + order.id;
+      card.querySelector(".order-time").textContent = "Pedido às " + order.time;
+      card.querySelector(".order-summary").textContent = order.summary;
+      card.querySelector(".order-estimate").textContent = order.estimate + " min";
+
+      const stage = card.querySelector(".order-stage");
+      stage.textContent = stageLabels[order.stage];
+      stage.className = "order-stage rounded-full px-3 py-1 text-xs font-extrabold uppercase " + stageClass(order.stage);
+
+      const priority = card.querySelector(".order-priority");
+      priority.textContent = order.priority === "high" ? "Urgente" : order.priority === "normal" ? "Normal" : "Baixa";
+      priority.className = "order-priority rounded-full px-3 py-1 text-xs font-extrabold uppercase " + priorityClass(order.priority);
+    }
+
+    function updateOrderList() {
+      const visibleOrders = orders.filter(order => activeFilter === "todos" || order.stage === activeFilter);
+      const visibleIds = new Set(visibleOrders.map(order => order.id));
+
+      orderCards.forEach((card, id) => {
+        if (!visibleIds.has(id)) card.remove();
+      });
+
+      visibleOrders.forEach(order => {
+        let card = orderCards.get(order.id);
+        if (!card) card = createOrderCard(order);
+        updateOrderCard(card, order);
+        orderList.appendChild(card);
+      });
+
+      document.getElementById("empty-orders").classList.toggle("hidden", visibleOrders.length !== 0);
+      document.getElementById("visible-count").textContent = visibleOrders.length + (visibleOrders.length === 1 ? " pedido visível" : " pedidos visíveis");
+    }
+
+    function updateMetrics() {
+      const activeOrders = orders.filter(order => order.stage !== "entregue");
+      const average = activeOrders.length
+        ? Math.round(activeOrders.reduce((sum, order) => sum + order.estimate, 0) / activeOrders.length)
+        : 0;
+      const late = activeOrders.filter(order => order.elapsed > order.estimate).length;
+
+      document.getElementById("total-orders").textContent = orders.length;
+      document.getElementById("average-time").textContent = average + " min";
+      document.getElementById("late-orders").textContent = late;
+    }
+
+    function updateDetails() {
+      const order = getOrder(selectedId) || orders[0];
+      if (!order) return;
+      selectedId = order.id;
+
+      document.getElementById("detail-heading").textContent = "#" + order.id;
+      document.getElementById("detail-time").textContent = order.time;
+      document.getElementById("detail-estimate").textContent = order.estimate + " min";
+      document.getElementById("detail-notes").textContent = order.notes;
+
+      const stage = document.getElementById("detail-stage");
+      stage.textContent = stageLabels[order.stage];
+      stage.className = "rounded-full px-3 py-1 text-xs font-extrabold uppercase " + stageClass(order.stage);
+
+      const priority = document.getElementById("detail-priority");
+      priority.textContent = priorityLabels[order.priority];
+      priority.className = "rounded-full px-3 py-1 text-xs font-extrabold uppercase " + priorityClass(order.priority);
+
+      const items = document.getElementById("detail-items");
+      const itemMap = new Map([...items.children].map(item => [item.dataset.item, item]));
+
+      order.items.forEach((item, index) => {
+        let row = itemMap.get(item);
+        if (!row) {
+          row = document.createElement("div");
+          row.dataset.item = item;
+          row.className = "flex items-center justify-between gap-3 px-4 py-3 text-sm font-semibold";
+          row.innerHTML = '<span class="detail-item-text"></span><span class="mono rounded-lg bg-[#fff1bd] px-2 py-1 text-xs font-bold"></span>';
+          items.appendChild(row);
+        }
+        row.querySelector(".detail-item-text").textContent = item;
+        row.querySelector(".mono").textContent = String(index + 1).padStart(2, "0");
+        itemMap.delete(item);
+      });
+
+      itemMap.forEach(row => row.remove());
+
+      const stageIndex = stages.indexOf(order.stage);
+      document.getElementById("previous-button").disabled = stageIndex === 0;
+      document.getElementById("next-button").disabled = stageIndex === stages.length - 1;
+    }
+
+    function updateFilters() {
+      document.querySelectorAll("[data-stage]").forEach(button => {
+        const active = button.dataset.stage === activeFilter;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    function updateOperations() {
+      updateMetrics();
+      updateFilters();
+      updateOrderList();
+      updateDetails();
+    }
+
+    function checkout() {
+      if (cartCount() === 0) {
+        const message = document.getElementById("checkout-message");
+        message.textContent = "Adicione ao menos um item para finalizar.";
+        message.classList.remove("hidden");
+        return;
+      }
+
+      const items = Object.entries(cart).map(([id, quantity]) => quantity + "x " + productData[id].name);
+      const orderId = String(nextOrderId++);
+      const now = new Date();
+      const time = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      const order = {
+        id: orderId,
+        time,
+        stage: "novo",
+        estimate: Math.min(20, 8 + cartCount() * 2),
+        elapsed: 0,
+        priority: cartCount() >= 4 ? "high" : "normal",
+        summary: items.join(" • "),
+        items,
+        notes: "Pagamento selecionado no autoatendimento."
+      };
+
+      orders.unshift(order);
+      selectedId = order.id;
+      activeFilter = "todos";
+
+      document.getElementById("receipt-number").textContent = "#" + orderId;
+      document.getElementById("receipt-time").textContent = order.estimate + " min";
+      document.getElementById("receipt-section").classList.remove("hidden");
+
+      cart = {};
+      document.getElementById("checkout-message").classList.add("hidden");
+      renderCart();
+      updateOperations();
+
+      document.getElementById("receipt-section").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    document.querySelectorAll("[data-product]").forEach(button => {
+      button.addEventListener("click", () => addToCart(button.dataset.product));
+    });
+
+    document.querySelectorAll("[data-category]").forEach(button => {
+      button.addEventListener("click", () => {
+        activeCategory = button.dataset.category;
+        updateCategoryButtons();
+        updateProductVisibility();
+      });
+    });
+
+    document.getElementById("product-search").addEventListener("input", updateProductVisibility);
+
+    document.querySelectorAll("[data-payment]").forEach(button => {
+      button.addEventListener("click", () => {
+        activePayment = button.dataset.payment;
+        updatePaymentButtons();
+      });
+    });
+
+    document.getElementById("checkout-button").addEventListener("click", checkout);
+
+    document.getElementById("new-order-button").addEventListener("click", () => {
+      document.getElementById("receipt-section").classList.add("hidden");
+      document.getElementById("customer-heading").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    document.getElementById("jump-to-operations").addEventListener("click", () => {
+      document.getElementById("operations-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    document.querySelectorAll("[data-stage]").forEach(button => {
+      button.addEventListener("click", () => {
+        activeFilter = button.dataset.stage;
+        updateOperations();
+      });
+    });
+
+    document.getElementById("previous-button").addEventListener("click", () => {
+      const order = getOrder(selectedId);
+      const index = stages.indexOf(order.stage);
+      if (index > 0) {
+        order.stage = stages[index - 1];
+        order.elapsed = Math.max(0, order.elapsed - 2);
+        updateOperations();
+      }
+    });
+
+    document.getElementById("next-button").addEventListener("click", () => {
+      const order = getOrder(selectedId);
+      const index = stages.indexOf(order.stage);
+      if (index < stages.length - 1) {
+        order.stage = stages[index + 1];
+        order.elapsed += 1;
+        updateOperations();
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateCategoryButtons();
+      updateProductVisibility();
+      updatePaymentButtons();
+      renderCart();
+      updateOperations();
+      lucide.createIcons();
+    });
+  </script>
+ 
+</body></html>
