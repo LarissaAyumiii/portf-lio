@@ -4,8 +4,8 @@
 :root {
   --woodsmoke: #100E11;
   --dove-gray: #706B68;
-  --bulgarian-rose: #490206;
-  --sepia-black: #2C0001;
+  --bulgarian-rose: #ba879000;
+  --sepia-black: #520d19;
 
   --branco-suave: #F2F0F0;
 
@@ -67,7 +67,7 @@ html {
 }
 
 body {
-  background-color: var(--fundo-base);
+  background-color: #6b212c;
   box-sizing: border-box;
   position: relative;
   line-height: 1.5;
@@ -290,7 +290,7 @@ textarea {
 .sobre__conteudo-detalhes-paragrafo strong {
   font-family: 'Source Sans Pro', sans-serif !important;
   font-weight: 700 !important;
-  color: var(--bulgarian-rose);
+  color: #bA8790;
 }
 
 .sobre__conteudo-detalhes-paragrafo:last-child {
@@ -453,25 +453,36 @@ textarea {
 
 .sobre__card {
   background: rgba(112, 107, 104, 0.08);
-  border: 1px solid var(--borda);
+  border: 1px solid var(--dove-gray);
   border-radius: 14px;
-  padding: 3rem;
+  padding: 1.75rem;
   backdrop-filter: blur(6px);
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.sobre__card:hover {
+.sobre__conteudo-principal:hover {
   border-color: var(--dove-gray);
+  border: 1px solid var(--dove-gray);
+  border-radius: 14px;
+  padding: 1.75rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 8px var(--dove-gray);
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    background 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
 .sobre__conteudo-detalhes-paragrafo {
   font-size: 1.8rem;
-  color: var(--texto-secundario);
+  color: #bA8790;
   max-width: 60rem;
   line-height: 1.7;
   margin-bottom: 1rem;
   font-family: 'Source Sans Pro', sans-serif !important;
 }
+
 
 .sobre__conteudo-imagem {
   background: transparent;
@@ -608,7 +619,7 @@ textarea {
   z-index: 2;
 }
 
-/* CARD DE CONTATO: FUNDO BRANCO, MENOS BLUR, BRILHO #9b7678 */
+/* bosta de card branco do contato*/
 .contato__form-container {
   position: relative;
   isolation: isolate;
@@ -616,17 +627,17 @@ textarea {
   --mouse-x: 50%;
   --mouse-y: 50%;
 
-  /* Variáveis locais só para este card */
+  /* variáveis locais só para este card */
   --neon-accent: #9b7678;
   --neon-accent-soft: rgba(155, 118, 120, 0.35);
   --neon-accent-glow: rgba(155, 118, 120, 0.22);
   --neon-border-rest: rgba(155, 118, 120, 0.25);
   --neon-glow-rest: rgba(155, 118, 120, 0.08);
 
-  /* Fundo branco com leve transparência */
+  /* fundo branco*/
   background: rgba(255, 255, 255, 0.151) !important;
 
-  /* Menos blur */
+  /* menos blur */
   backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;
 
@@ -806,8 +817,8 @@ textarea {
 
 .projeto-card-botao:hover {
   background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+  border-color: #bA8790;
+  box-shadow: #bA8790;
 }
 
 .projetos__habilidades {
@@ -818,22 +829,6 @@ textarea {
   margin: 10px 0;
 }
 
-.habilidades__habilidade {
-  font-size: 11px;
-  padding: 3px 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  color: #ccc;
-  box-shadow: none !important;
-  transition: none !important;
-}
-
-.habilidades__habilidade:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  box-shadow: none !important;
-}
 
 .projeto-cs-hero {
   color: var(--texto-claro);
@@ -1235,14 +1230,26 @@ textarea {
 }
 
 .habilidades__habilidade {
-  padding: 1rem 2rem;
-  font-size: 1.6rem;
-  background: rgba(112, 107, 104, 0.15);
-  border: 1px solid rgba(112, 107, 104, 0.25);
-  border-radius: 5px;
-  font-weight: 600;
-  color: var(--texto-claro);
-  margin-bottom: 2rem;
+  background: rgba(112, 107, 104, 0.08);
+  border: 1px solid var(--neon-border-rest);
+  border-radius: 7px;
+  padding: 1rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 8px var(--neon-glow-rest);
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    background 0.35s ease,
+    box-shadow 0.35s ease;
+
+}
+
+.habilidades__habilidade:hover {
+  border-color: var(--neon-accent);
+  background: rgba(73, 2, 6, 0.18);
+  box-shadow:
+    0 0 22px var(--neon-accent-glow),
+    0 10px 25px rgba(16, 14, 17, 0.35);
 }
 
 .mouse-scroll {
@@ -1317,7 +1324,6 @@ textarea {
   gap: 1.5rem;
 }
 
-/* Cards de certificado mantêm o neon original (ff3b5c) */
 .certificado-card {
   position: relative;
   isolation: isolate;
