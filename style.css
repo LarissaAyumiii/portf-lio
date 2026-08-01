@@ -1220,16 +1220,19 @@ textarea {
 .habilidades {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .projetos__habilidades {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 1.5rem;
   flex-wrap: wrap;
 }
 
 .habilidades__habilidade {
+  color: var(--texto-claro);
   background: rgba(112, 107, 104, 0.08);
   border: 1px solid var(--neon-border-rest);
   border-radius: 7px;
@@ -1241,7 +1244,6 @@ textarea {
     border-color 0.35s ease,
     background 0.35s ease,
     box-shadow 0.35s ease;
-
 }
 
 .habilidades__habilidade:hover {
