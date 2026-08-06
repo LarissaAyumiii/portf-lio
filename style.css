@@ -238,6 +238,11 @@ textarea {
   font-size: 2rem;
 }
 
+.botao--grande:hover {
+  background: var(--bulgarian-rose);
+  color: var(--texto-claro);
+}
+
 .botao--medio {
   padding: 1.5rem 5rem;
   font-size: 1.6rem;
@@ -491,6 +496,10 @@ textarea {
   backdrop-filter: none;
 }
 
+.sobre__conteudo-imagem :hover {
+  transform: translateY(-4px);
+  border-color: var(--neon-accent) !important;
+}
 .sobre__conteudo-imagem-img {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -499,7 +508,6 @@ textarea {
   border: 3px solid var(--bulgarian-rose);
   box-shadow: 0 0 25px rgba(73, 2, 6, 0.55);
 }
-
 .projetos {
   background: var(--woodsmoke);
 }
@@ -816,9 +824,9 @@ textarea {
 }
 
 .projeto-card-botao:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: #bA8790;
-  box-shadow: #bA8790;
+  background: #db546d84;
+  border-color: #ed4d6a;
+  box-shadow: #bd5064;
 }
 
 .projetos__habilidades {

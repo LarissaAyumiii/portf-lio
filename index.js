@@ -1,6 +1,3 @@
-// =========================================================
-// EFEITO DE DIGITAÇÃO - HERO
-// =========================================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -19,63 +16,45 @@ document.addEventListener("DOMContentLoaded", () => {
     function efeitoDigitacao() {
 
       if (!apagando) {
-
         h1.textContent = textoHero.substring(0, indice);
         indice++;
-
         if (indice <= textoHero.length) {
-
           setTimeout(
             efeitoDigitacao,
             velocidadeDigitacao
           );
 
         } else {
-
           apagando = true;
-
           setTimeout(
             efeitoDigitacao,
             pausa
           );
-
         }
 
       } else {
-
         h1.textContent = textoHero.substring(0, indice);
         indice--;
-
         if (indice >= 0) {
-
           setTimeout(
             efeitoDigitacao,
             velocidadeApagar
           );
 
         } else {
-
           apagando = false;
           indice = 0;
-
           setTimeout(
             efeitoDigitacao,
             500
           );
-
         }
-
       }
-
     }
 
     efeitoDigitacao();
 
   }
-
-  // =========================================================
-  // EFEITO DE DIGITAÇÃO DOS TÍTULOS DAS SEÇÕES
-  // =========================================================
 
   function escreverTitulo(
     selector,
@@ -95,23 +74,18 @@ document.addEventListener("DOMContentLoaded", () => {
     function escrever() {
 
       if (indice < texto.length) {
-
         elemento.textContent +=
           texto.charAt(indice);
-
         indice++;
-
         setTimeout(
           escrever,
           velocidade
         );
-
       }
 
     }
 
     if ("IntersectionObserver" in window) {
-
       const observer = new IntersectionObserver(
         (entries) => {
 
@@ -121,17 +95,11 @@ document.addEventListener("DOMContentLoaded", () => {
               entry.isIntersecting &&
               !iniciou
             ) {
-
               iniciou = true;
-
               escrever();
-
               observer.unobserve(elemento);
-
             }
-
           });
-
         },
         {
           threshold: 0.3
@@ -141,16 +109,11 @@ document.addEventListener("DOMContentLoaded", () => {
       observer.observe(elemento);
 
     } else {
-
       escrever();
-
     }
-
   }
 
-  // =========================================================
-  // TÍTULOS DAS SEÇÕES
-  // =========================================================
+  // titudo das paginas
 
   escreverTitulo(
     ".titulo-sobre",
@@ -172,9 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "Contato"
   );
 
-  // =========================================================
-  // MENU MOBILE
-  // =========================================================
+  // mobile
 
   const botaoMenuHamburguer =
     document.querySelector(
@@ -208,15 +169,12 @@ document.addEventListener("DOMContentLoaded", () => {
       menuMobile.classList.remove(
         "cabecalho__menu-mobile--ativo"
       );
-
     }
 
     if (iconeMenuHamburguer) {
-
       iconeMenuHamburguer.classList.remove(
         "escondido"
       );
-
     }
 
     if (iconeFecharMenuHamburguer) {
@@ -224,9 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
       iconeFecharMenuHamburguer.classList.add(
         "escondido"
       );
-
     }
-
   }
 
   if (
@@ -237,16 +193,13 @@ document.addEventListener("DOMContentLoaded", () => {
     botaoMenuHamburguer.addEventListener(
       "click",
       () => {
-
         const menuAberto =
           menuMobile.classList.contains(
             "cabecalho__menu-mobile--ativo"
           );
 
         if (menuAberto) {
-
           fecharMenuMobile();
-
         } else {
 
           menuMobile.classList.add(
@@ -266,14 +219,10 @@ document.addEventListener("DOMContentLoaded", () => {
             iconeFecharMenuHamburguer.classList.remove(
               "escondido"
             );
-
           }
-
         }
-
       }
     );
-
   }
 
   linksMenuMobile.forEach(
@@ -325,13 +274,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }
 
-  // =========================================================
-  // EFEITO NEON QUE SEGUE O MOUSE (CERTIFICADOS E CONTATO)
-  // =========================================================
+  // efeito que segue o mouse
 
   const cardsNeon =
     document.querySelectorAll(
-      ".certificado-card, .contato__form-container"
+      ".certificado-card, .contato__form-container, .certificado-card__botao, .projeto-card, .projeto-card-botao"
     );
 
   cardsNeon.forEach(
@@ -366,9 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   );
 
-  // =========================================================
-  // MUDANÇA DE COR DO CABEÇALHO POR SEÇÃO
-  // =========================================================
+  //muda cor do cabecalho
 
   const cabecalho =
     document.querySelector(
